@@ -1,0 +1,7 @@
+{
+  "build": {
+    "env": {
+      "POSTGRES_URL": "postgresql://authenticator:npg_TWwXNgj7e9Sx@ep-tiny-recipe-apgzmi8g-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require"
+    }
+  }
+}
