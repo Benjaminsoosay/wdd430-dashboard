@@ -124,8 +124,9 @@ export async function updateInvoice(id: string, formData: FormData) {
       SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
       WHERE id = ${id}
     `;
-  } catch {
-    return { message: 'Database Error: Failed to Update Invoice.' };
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to update invoice.');
   }
 
   revalidatePath('/dashboard/invoices');
