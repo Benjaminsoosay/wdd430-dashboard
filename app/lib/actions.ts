@@ -62,13 +62,21 @@ export async function authenticate(
 
 // ================= CREATE INVOICE =================
 export async function createInvoice(prevState: State, formData: FormData) {
+  console.log('=== CREATE INVOICE DEBUG ===');
+  console.log('customerId raw:', formData.get('customerId'));
+  console.log('amount raw:', formData.get('amount'));
+  console.log('status raw:', formData.get('status'));
+  console.log('customerId type:', typeof formData.get('customerId'));
+  
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
 
+  console.log('Validation success:', validatedFields.success);
   if (!validatedFields.success) {
+    console.log('Validation errors:', validatedFields.error.flatten().fieldErrors);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Invoice.',
@@ -76,6 +84,10 @@ export async function createInvoice(prevState: State, formData: FormData) {
   }
 
   const { customerId, amount, status } = validatedFields.data;
+  console.log('Validated - customerId:', customerId, 'type:', typeof customerId);
+  console.log('Validated - amount:', amount);
+  console.log('Validated - status:', status);
+  
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
 
@@ -84,7 +96,9 @@ export async function createInvoice(prevState: State, formData: FormData) {
       INSERT INTO invoices (customer_id, amount, status, date)
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
-  } catch {
+    console.log('Insert successful');
+  } catch (error) {
+    console.error('Insert error:', error);
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
