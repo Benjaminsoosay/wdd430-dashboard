@@ -8,10 +8,11 @@ import {
   LatestInvoicesSkeleton,
   CardsSkeleton,
 } from '@/app/ui/skeletons';
-import { fetchRevenue } from '@/app/lib/data'; // Add this import
+import { fetchRevenue, fetchLatestInvoices } from '@/app/lib/data'; // Add fetchLatestInvoices
 
 export default async function Page() {
-  const revenue = await fetchRevenue(); // Fetch the revenue data
+  const revenue = await fetchRevenue(); // Fetch revenue data
+  const latestInvoices = await fetchLatestInvoices(); // Fetch latest invoices data
   
   return (
     <main>
@@ -25,10 +26,10 @@ export default async function Page() {
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
         <Suspense fallback={<RevenueChartSkeleton />}>
-          <RevenueChart revenue={revenue} /> {/* Pass the revenue prop */}
+          <RevenueChart revenue={revenue} /> {/* Pass revenue prop */}
         </Suspense>
         <Suspense fallback={<LatestInvoicesSkeleton />}>
-          <LatestInvoices />
+          <LatestInvoices latestInvoices={latestInvoices} /> {/* Pass latestInvoices prop */}
         </Suspense>
       </div>
     </main>
