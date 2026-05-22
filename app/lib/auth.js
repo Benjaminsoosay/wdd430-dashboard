@@ -1,4 +1,3 @@
-import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions = {
@@ -10,21 +9,23 @@ export const authOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        // Your authentication logic here
-        // Return user object if valid, null if not
-        
-        if (credentials?.email === "user@example.com" && credentials?.password === "password") {
-          return { id: "1", name: "User", email: credentials.email };
+        // Simple test user - replace with database logic
+        if (credentials?.email === "test@example.com" && credentials?.password === "password") {
+          return {
+            id: "1",
+            email: "test@example.com",
+            name: "Test User",
+          };
         }
         return null;
       }
     })
   ],
-  pages: {
-    signIn: "/auth/signin",  // optional custom signin page
-  },
   session: {
-    strategy: "jwt",  // important for credentials provider
+    strategy: "jwt",
+  },
+  pages: {
+    signIn: "/login",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -34,12 +35,10 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.id;
       }
       return session;
     }
   }
 };
-
-export default NextAuth(authOptions);
