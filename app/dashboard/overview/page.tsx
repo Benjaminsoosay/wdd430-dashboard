@@ -1,3 +1,6 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { lusitana } from '@/app/ui/fonts';
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
 import LatestInvoices from '@/app/ui/dashboard/latest-invoices';
@@ -8,11 +11,11 @@ import {
   LatestInvoicesSkeleton,
   CardsSkeleton,
 } from '@/app/ui/skeletons';
-import { fetchRevenue, fetchLatestInvoices } from '@/app/lib/data'; // Add fetchLatestInvoices
+import { fetchRevenue, fetchLatestInvoices } from '@/app/lib/data';
 
 export default async function Page() {
-  const revenue = await fetchRevenue(); // Fetch revenue data
-  const latestInvoices = await fetchLatestInvoices(); // Fetch latest invoices data
+  const revenue = await fetchRevenue();
+  const latestInvoices = await fetchLatestInvoices();
   
   return (
     <main>
@@ -26,10 +29,10 @@ export default async function Page() {
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
         <Suspense fallback={<RevenueChartSkeleton />}>
-          <RevenueChart revenue={revenue} /> {/* Pass revenue prop */}
+          <RevenueChart revenue={revenue} />
         </Suspense>
         <Suspense fallback={<LatestInvoicesSkeleton />}>
-          <LatestInvoices latestInvoices={latestInvoices} /> {/* Pass latestInvoices prop */}
+          <LatestInvoices latestInvoices={latestInvoices} />
         </Suspense>
       </div>
     </main>
