@@ -10,6 +10,7 @@ import { AuthError } from 'next-auth';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
+// ================= INVOICE SCHEMA =================
 const FormSchema = z.object({
   id: z.string(),
   customerId: z.string({
@@ -41,14 +42,11 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
-  console.log('AUTHENTICATE: function called');
   try {
     await signIn('credentials', formData);
-    console.log('AUTHENTICATE: signIn succeeded');
+    return undefined; // success → no error message
   } catch (error) {
-    console.log('AUTHENTICATE: error caught:', error);
     if (error instanceof AuthError) {
-      console.log('AUTHENTICATE: AuthError type:', error.type);
       switch (error.type) {
         case 'CredentialsSignin':
           return 'Invalid credentials.';
@@ -56,6 +54,7 @@ export async function authenticate(
           return 'Something went wrong.';
       }
     }
+
     throw error;
   }
 }
@@ -66,17 +65,14 @@ export async function createInvoice(prevState: State, formData: FormData) {
   console.log('customerId raw:', formData.get('customerId'));
   console.log('amount raw:', formData.get('amount'));
   console.log('status raw:', formData.get('status'));
-  console.log('customerId type:', typeof formData.get('customerId'));
-  
+
   const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
 
-  console.log('Validation success:', validatedFields.success);
   if (!validatedFields.success) {
-    console.log('Validation errors:', validatedFields.error.flatten().fieldErrors);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Invoice.',
@@ -84,10 +80,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
   }
 
   const { customerId, amount, status } = validatedFields.data;
-  console.log('Validated - customerId:', customerId, 'type:', typeof customerId);
-  console.log('Validated - amount:', amount);
-  console.log('Validated - status:', status);
-  
+
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
 
@@ -96,9 +89,8 @@ export async function createInvoice(prevState: State, formData: FormData) {
       INSERT INTO invoices (customer_id, amount, status, date)
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
-    console.log('Insert successful');
   } catch (error) {
-    console.error('Insert error:', error);
+    console.error('Database Error:', error);
     return {
       message: 'Database Error: Failed to Create Invoice.',
     };
@@ -137,10 +129,11 @@ export async function updateInvoice(id: string, formData: FormData) {
 export async function deleteInvoice(id: string) {
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to delete invoice.');
   }
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
 }
